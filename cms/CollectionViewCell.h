@@ -18,6 +18,8 @@
 @property (nonatomic, strong) IBOutlet UILabel *hashtag5;
 @property (weak, nonatomic) IBOutlet UIView *signal;
 @property (weak, nonatomic) IBOutlet UIView *shadow;
+@property (weak, nonatomic) IBOutlet UIView *signalSecondary;
+@property (weak, nonatomic) IBOutlet UIImageView *videoIcon;
 
 
 @end

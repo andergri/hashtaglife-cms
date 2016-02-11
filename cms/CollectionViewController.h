@@ -7,10 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SelfieObject.h"
+#import <MediaPlayer/MediaPlayer.h>
 
 @interface CollectionViewController : UIViewController <UICollectionViewDataSource, UICollectionViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 @property NSMutableArray *selfies;
-
+@property SelfieStatus filter;
+- (BOOL) canReloadData;
+- (void) refreshAllData;
+- (void) playMovie:(NSString*)url;
 @end

@@ -7,10 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "CollectionViewController.h"
 #import "SelfieObject.h"
 
-@interface InfoViewController : UIViewController <UIActionSheetDelegate>
+@interface InfoViewController : UIViewController <UIActionSheetDelegate, UIGestureRecognizerDelegate>
 
+@property SelfieObject *currentSelfie;
+@property CollectionViewController* collectionViewController;
 - (void) setSelfie:(SelfieObject*)selfie;
 
 @end

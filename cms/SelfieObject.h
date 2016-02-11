@@ -26,7 +26,16 @@ typedef enum {
     ComplaintOther,
     ComplaintReport,
     ComplaintSpam,
+    ComplaintNotSet,
 } SelfieComplaint;
+
+typedef enum {
+    StatusRed,
+    StatusYellow,
+    StatusGreen,
+    StatusPurple,
+    StatusAll
+} SelfieStatus;
 
 /**
  @"Delete my photo": @"Delete",
@@ -57,24 +66,22 @@ typedef enum {
 @property NSString* locationName;
 @property NSString* video;
 @property NSArray* complainer;
+@property SelfieStatus status;
 
 - (id)init:(id)responseObject;
+- (id)initPF:(PFObject*)responseObject;
+
+typedef void (^NameCompletionBlock)(NSString *name);
 
 // Methods
 - (NSString *) getStatusLabel;
 - (UIColor *) getStatusColor;
 - (NSString*) getPostedTime;
 
-// Actions
-- (void) incrementLike:(BOOL)increment by:(int)by;
-- (void) incrementVisits:(BOOL)increment by:(int)by;
-- (void) deleteHashtag:(NSString*)hashtag;
-- (void) sendMessage:(SelfieMessage)messsage;
-- (void) contentClear;
-- (void) contentFlag:(SelfieComplaint)acomplaint flag:(int)flag;
-- (void) contentOnlyUserCanSee:(SelfieComplaint)acomplaint;
-- (void) contentBlock:(SelfieComplaint)acomplaint;
-- (void) banPoster;
+- (void) getUser:(NameCompletionBlock)block;
+- (void) getLocation:(NameCompletionBlock)block;
+- (BOOL) isHashtagFlagged:(NSString *)hashtag;
+- (NSAttributedString *) getAtrributedHashtag:(NSString *)hashtag;
 
 
 @end

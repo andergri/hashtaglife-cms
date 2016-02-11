@@ -31,6 +31,7 @@
 @synthesize locationName;
 @synthesize video;
 @synthesize complainer;
+@synthesize status;
 
 - (id)init:(id)responseObject{
     if ((self = [super init])) {
@@ -58,8 +59,34 @@
         }
     }
     [self addMissingHashtags];
-    [self getUser];
-    [self getLocation];
+    [self getStatusColor];
+    return self;
+}
+
+- (id)initPF:(PFObject*)responseObject{
+    if ((self = [super init])) {
+        
+        @try {
+            self.objectId = responseObject.objectId;
+            self.createdAt = responseObject.createdAt;
+            self.updatedAt = responseObject.updatedAt;
+            self.complaint = responseObject[@"complaint"];
+            self.flags = [NSNumber numberWithInt:[responseObject[@"flags"] intValue]];
+            self.image = ((PFFile*)responseObject[@"image"]).url;
+            self.from = ((PFUser*)responseObject[@"from"]).objectId;
+            self.likes = [NSNumber numberWithInt:[responseObject[@"likes"] intValue]];
+            self.visits = [NSNumber numberWithInt:[responseObject[@"visits"] intValue]];
+            self.hashtags = responseObject[@"hashtags"];
+            self.location = ((PFObject*)responseObject[@"location"]).objectId;
+            self.video = ((PFFile*)responseObject[@"video"]).url;
+            self.complainer = responseObject[@"complainer"];
+        }
+        @catch (NSException *exception) {
+            NSLog(@"%@", exception);
+        }
+    }
+    [self addMissingHashtags];
+    [self getStatusColor];
     return self;
 }
 
@@ -94,16 +121,21 @@
     NSDate *newDate = [[NSDate alloc] initWithTimeInterval:-3600*4
                                                  sinceDate:[NSDate date]];
     
-    if ([complaint containsObject:@"Admin"]) {
+    if ([complaint containsObject:@"Admin"]){
+        status = StatusRed;
         return [UIColor redColor];
     }else if([complaint containsObject:@"Delete"]){
+        status = StatusPurple;
         return [UIColor purpleColor];
     }else if(([self.flags intValue] <= 4) &&
              ([self.likes intValue] > -4)){
+        status = StatusGreen;
         return [UIColor greenColor];
      }else if ([self.createdAt compare:newDate] == NSOrderedAscending){
-        return [UIColor redColor];
+        status = StatusRed;
+        return [UIColor orangeColor];
     }else{
+        status = StatusYellow;
         return [UIColor colorWithRed:242.0/255.0 green:218.0/255.0 blue:0/255.0 alpha:1];
     }
 }
@@ -111,7 +143,7 @@
 - (NSString*) getPostedTime{
     
     NSCalendar *c = [NSCalendar currentCalendar];
-    NSDate *d1 = [[NSDate date] dateByAddingTimeInterval:3600*4];
+    NSDate *d1 = [NSDate date];
     NSDate *d2 = self.createdAt;
     NSDateComponents *components = [c components:(NSCalendarUnitMinute|NSCalendarUnitSecond|NSCalendarUnitHour) fromDate:d2 toDate:d1 options:0];
     if (components.hour > 0) {
@@ -121,211 +153,85 @@
         return [NSString stringWithFormat:@"%ldm", (long)components.minute];
     }
     if (components.second > 0){
-        return [NSString stringWithFormat:@"%lds", (long)components.second];
+        return [NSString stringWithFormat:@"sec"];
     }
-    return @"null";
+    return @"now";
 }
 
-- (void) getUser{
-
-    PFQuery *query = [PFUser query];
-    [query getObjectInBackgroundWithId:self.from
-        block:^(PFObject *ouser, NSError *error) {
-        PFUser *auser = (PFUser *)ouser;
-        self.userObject = auser;
-        self.user = auser.username;
-    }];
-}
-
-- (void) getLocation{
+- (void) getUser:(NameCompletionBlock)block{
     
-    PFQuery *query = [PFQuery queryWithClassName:@"Location"];
-    [query getObjectInBackgroundWithId:self.location
-                                 block:^(PFObject *olocation, NSError *error) {
-                                     self.locationName = olocation[@"name"];
-                                 }];
-}
-
-/**
- ACTIONS *****
- **/
-
-
-// Actions
-- (void) incrementLike:(BOOL)increment by:(int)by{
-    PFQuery *query = [PFQuery queryWithClassName:@"Selfie"];
-    [query getObjectInBackgroundWithId:self.objectId block:^(PFObject *selfie, NSError *error) {
-        if (error == nil) {
-            int newLikes;
-            if (increment) {
-                newLikes = by + [self.likes intValue];
-            }else {
-                newLikes = [self.likes intValue] - by;
-            }
-            NSLog(@"%d %d %d", newLikes, [self.likes intValue], by);
-            selfie[@"likes"] = @(newLikes);
-            [selfie saveInBackground];
-            self.likes = [NSNumber numberWithInt:newLikes];
-        }
-    }];
-}
-- (void) incrementVisits:(BOOL)increment by:(int)by{
-    PFQuery *query = [PFQuery queryWithClassName:@"Selfie"];
-    [query getObjectInBackgroundWithId:self.objectId block:^(PFObject *selfie, NSError *error) {
-        if (error == nil) {
-            int newVisits;
-            if (increment) {
-                newVisits = by + [self.visits intValue];
-            }else {
-                newVisits = [self.visits intValue] - by;
-            }
-            NSLog(@"%d %d %d", newVisits,[self.visits intValue], by);
-            selfie[@"visits"] = @(newVisits);
-            [selfie saveInBackground];
-            self.visits = [NSNumber numberWithInt:newVisits];
-        }
-    }];
-}
-- (void) deleteHashtag:(NSString*)hashtag{
-    PFQuery *query = [PFQuery queryWithClassName:@"Selfie"];
-    NSLog(@"hashtag %@", hashtag);
-    [query getObjectInBackgroundWithId:self.objectId block:^(PFObject *selfie, NSError *error) {
-        if (error == nil) {
-            if ([self.hashtags containsObject:hashtag]) {
-                [self.hashtags removeObject:hashtag];
-                [self.hashtags removeObjectIdenticalTo:@""];
-                selfie[@"hashtags"] = self.hashtags;
-                [selfie saveInBackground];
-                [self addMissingHashtags];
-            }
-        }
-    }];
-}
-- (void) sendMessage:(SelfieMessage)messsage{
-    
-    PFQuery *pushQuery = [PFInstallation query];
-    NSArray *users = [NSArray arrayWithObject:self.userObject];
-    [pushQuery whereKey:@"user" containedIn:users];
-    PFPush *push = [[PFPush alloc] init];
-    [push setQuery:pushQuery];
-    NSString *emessage = @"";
-    switch (messsage) {
-        case stop_inappropriate:
-            emessage = @"It's time to grow up, #life team";
-            break;// you are now going to receive 50 ** picks, spam bi**tch
-        case stop_spamming:
-            emessage = @"special processed american meat, #life team";
-            break;
-        default:
-            break;
-    }
-    [push setMessage:emessage];
-    [push sendPushInBackground];
-}
-
-- (void) contentClear{
-    PFQuery *query = [PFQuery queryWithClassName:@"Selfie"];
-    [query getObjectInBackgroundWithId:self.objectId block:^(PFObject *selfie, NSError *error) {
-        if (error == nil) {
-            selfie[@"flags"] = @0;
-            selfie[@"complaint"] = @[];
-            [selfie saveInBackground];
-            self.flags = [NSNumber numberWithInt:0];
-            [self.complaint removeAllObjects];
-        }
-    }];
-}
-- (void) contentFlag:(SelfieComplaint)acomplaint flag:(int)flag{
-    PFQuery *query = [PFQuery queryWithClassName:@"Selfie"];
-    [query getObjectInBackgroundWithId:self.objectId block:^(PFObject *selfie, NSError *error) {
-        if (error == nil) {
-            selfie[@"flags"] = @(flag);
-            [selfie addUniqueObject:[self getComplaintString:acomplaint] forKey:@"complaint"];
-            [selfie saveInBackground];
-            self.flags = [NSNumber numberWithInt:flag];
-            if (![self.complaint containsObject:[self getComplaintString:acomplaint]])
-                [self.complaint addObject:[self getComplaintString:acomplaint]];
-        }
-    }];
-}
-- (void) contentOnlyUserCanSee:(SelfieComplaint)acomplaint{
-    PFQuery *query = [PFQuery queryWithClassName:@"Selfie"];
-    [query getObjectInBackgroundWithId:self.objectId block:^(PFObject *selfie, NSError *error) {
-        if (error == nil) {
-            selfie[@"flags"] = @6;
-            [selfie addUniqueObject:[self getComplaintString:ComplaintAuto] forKey:@"complaint"];
-            [selfie addUniqueObject:[self getComplaintString:acomplaint] forKey:@"complaint"];
-            [selfie saveInBackground];
-            self.flags = [NSNumber numberWithInt:6];
-            if (![self.complaint containsObject:[self getComplaintString:ComplaintAuto]])
-                [self.complaint addObject:[self getComplaintString:ComplaintAuto]];
-            if (![self.complaint containsObject:[self getComplaintString:acomplaint]])
-                [self.complaint addObject:[self getComplaintString:acomplaint]];
-        }
-    }];
-}
-- (void) contentBlock:(SelfieComplaint)acomplaint{
-    PFQuery *query = [PFQuery queryWithClassName:@"Selfie"];
-    [query getObjectInBackgroundWithId:self.objectId block:^(PFObject *selfie, NSError *error) {
-        if (error == nil) {
-            selfie[@"flags"] = @6;
-            [selfie addUniqueObject:[self getComplaintString:ComplaintAdmin] forKey:@"complaint"];
-            [selfie addUniqueObject:[self getComplaintString:acomplaint] forKey:@"complaint"];
-            [selfie saveInBackground];
-            self.flags = [NSNumber numberWithInt:6];
-            if (![self.complaint containsObject:[self getComplaintString:ComplaintAdmin]])
-                [self.complaint addObject:[self getComplaintString:ComplaintAdmin]];
-            if (![self.complaint containsObject:[self getComplaintString:acomplaint]])
-                [self.complaint addObject:[self getComplaintString:acomplaint]];
-        }
-    }];
-}
-- (void) banPoster{
-    [PFCloud callFunction:@"banUser" withParameters:@{
-                                                       @"userId": self.from,
-                                                       }];
-    
-}
-
-// Other
-- (NSString *) getComplaintString:(SelfieComplaint)acomplaint{
-    switch (acomplaint) {
-        case ComplaintAuto:
-            return @"Auto";
-            break;
-        case ComplaintDelete:
-            return @"Delete";
-            break;
-        case ComplaintAdmin:
-            return @"Admin";
-            break;
-        case ComplaintPornography:
-            return @"Pornography";
-            break;
-        case ComplaintViolence:
-            return @"Violence";
-            break;
-        case ComplaintHarm:
-            return @"Harm";
-            break;
-        case ComplaintAttack:
-            return @"Attack";
-            break;
-        case ComplaintHateful:
-            return @"Hateful";
-            break;
-        case ComplaintOther:
-            return @"Other";
-            break;
-        case ComplaintReport:
-            return @"Report";
-            break;
-        case ComplaintSpam:
-            return @"Spam";
-            break;
-        default:
-            break;
+    if (self.user == nil) {
+        PFQuery *query = [PFUser query];
+        [query getObjectInBackgroundWithId:self.from
+                                     block:^(PFObject *ouser, NSError *error) {
+                                         if (error == nil) {
+                                             PFUser *auser = (PFUser *)ouser;
+                                             self.userObject = auser;
+                                             self.user = auser.username;
+                                             block(self.user);
+                                         }else{
+                                             block(nil);
+                                         }
+                                     }];
+    }else{
+        block(self.user);
     }
 }
+
+- (void) getLocation:(NameCompletionBlock)block{
+    
+    if (self.locationName.length == 0) {
+        PFQuery *query = [PFQuery queryWithClassName:@"Location"];
+        [query getObjectInBackgroundWithId:self.location
+                                     block:^(PFObject *olocation, NSError *error) {
+                                         if (error == nil) {
+                                             self.locationName = olocation[@"name"];
+                                             block(self.locationName);
+                                         }else{
+                                             block(nil);
+                                         }
+                                     }];
+    }else{
+        block(self.locationName);
+    }
+}
+
+// BAD Hashtags
+
+- (NSAttributedString *) getAtrributedHashtag:(NSString *)hashtag{
+
+    
+    NSMutableAttributedString * string = [[NSMutableAttributedString alloc] initWithString:hashtag];
+    NSArray *flaggedKeyWords = [self getFlaggedHashtags:hashtag];
+    [string addAttribute:NSForegroundColorAttributeName value:[UIColor whiteColor] range:NSMakeRange(0,string.length)];
+
+    if (flaggedKeyWords.count > 0) {
+        [string addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithRed:149.0/255.0 green:165.0/255.0 blue:166.0/255.0 alpha:1.0] range:NSMakeRange(0,string.length)];
+        for (NSString *flaggedkey in flaggedKeyWords) {
+            if ([hashtag rangeOfString:flaggedkey].location != NSNotFound){
+                [string addAttribute:NSForegroundColorAttributeName value:[UIColor colorWithRed:241.0/255.0 green:196.0/255.0 blue:15.0/255.0 alpha:1.0]  range:NSMakeRange([hashtag rangeOfString:flaggedkey].location, flaggedkey.length)];
+            }
+        }
+    }
+    
+    return string;
+}
+
+- (NSArray *) getFlaggedHashtags:(NSString *)hashtag{
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"bad_hashtags" ofType:@"plist"];
+    NSArray *badHashtags = [NSArray arrayWithContentsOfFile:path];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%@ contains[c] SELF",hashtag];
+    return [badHashtags filteredArrayUsingPredicate:predicate];
+}
+
+- (BOOL) isHashtagFlagged:(NSString *)hashtag{
+    
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"bad_hashtags" ofType:@"plist"];
+    NSArray *badHashtags = [NSArray arrayWithContentsOfFile:path];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"%@ contains[c] SELF",hashtag];
+    NSArray *results = [badHashtags filteredArrayUsingPredicate:predicate];
+    return results.count > 0;
+}
+
 
 @end

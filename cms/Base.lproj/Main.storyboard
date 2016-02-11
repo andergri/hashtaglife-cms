@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BLJ-Mm-gQb">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BLJ-Mm-gQb">
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
@@ -14,35 +14,63 @@
                         <viewControllerLayoutGuide type="bottom" id="3Nk-uT-m5j"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="nxe-Nb-RWf">
-                        <rect key="frame" x="0.0" y="64" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <containerView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" placeholderIntrinsicWidth="320" placeholderIntrinsicHeight="568" translatesAutoresizingMaskIntoConstraints="NO" id="Zyz-Lr-u77">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                            <containerView opaque="NO" contentMode="scaleToFill" placeholderIntrinsicWidth="320" placeholderIntrinsicHeight="568" translatesAutoresizingMaskIntoConstraints="NO" id="Zyz-Lr-u77">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <connections>
                                     <segue destination="VEf-QL-OOu" kind="embed" identifier="CollectionViewControllerSegue" id="ygf-GS-C3p"/>
                                 </connections>
                             </containerView>
+                            <pickerView hidden="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2By-O6-xgP">
+                                <rect key="frame" x="0.0" y="438" width="600" height="162"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </pickerView>
                         </subviews>
                         <color key="backgroundColor" red="0.78612253860000003" green="1" blue="0.84353581320000004" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstItem="3Nk-uT-m5j" firstAttribute="top" secondItem="Zyz-Lr-u77" secondAttribute="bottom" id="0EF-h7-VIn"/>
+                            <constraint firstItem="2By-O6-xgP" firstAttribute="leading" secondItem="nxe-Nb-RWf" secondAttribute="leadingMargin" constant="-16" id="0tn-i0-Bgd"/>
+                            <constraint firstItem="Zyz-Lr-u77" firstAttribute="leading" secondItem="nxe-Nb-RWf" secondAttribute="leading" id="FMo-rN-qdt"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="2By-O6-xgP" secondAttribute="trailing" constant="-16" id="K0U-GR-V3J"/>
+                            <constraint firstItem="3Nk-uT-m5j" firstAttribute="top" secondItem="2By-O6-xgP" secondAttribute="bottom" id="iPq-6I-yaI"/>
+                            <constraint firstItem="Zyz-Lr-u77" firstAttribute="top" secondItem="nxe-Nb-RWf" secondAttribute="top" id="rk8-Kw-lXn"/>
+                            <constraint firstAttribute="trailing" secondItem="Zyz-Lr-u77" secondAttribute="trailing" id="xzg-uO-m9g"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="8Z9-eZ-2Zy">
+                        <nil key="title"/>
+                        <barButtonItem key="leftBarButtonItem" style="plain" id="vV9-q5-dRC">
+                            <pageControl key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="5" id="pvN-Hb-EN7">
+                                <rect key="frame" x="16" y="3" width="90" height="37"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="currentPageIndicatorTintColor" red="0.0" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <connections>
+                                    <action selector="colorSwitch:" destination="rDv-iT-RZO" eventType="valueChanged" id="bKd-jX-XRa"/>
+                                </connections>
+                            </pageControl>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="...starting" id="aMd-EE-5vZ">
                             <color key="tintColor" red="1" green="0.11211489430077526" blue="0.056452525742964554" alpha="1" colorSpace="calibratedRGB"/>
+                            <connections>
+                                <action selector="refreshStatus:" destination="rDv-iT-RZO" id="25z-2E-bQc"/>
+                            </connections>
                         </barButtonItem>
                     </navigationItem>
                     <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <nil key="simulatedBottomBarMetrics"/>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <connections>
+                        <outlet property="colorControl" destination="pvN-Hb-EN7" id="1VP-ub-Ct8"/>
                         <outlet property="containerView" destination="Zyz-Lr-u77" id="jo5-Jb-qOh"/>
+                        <outlet property="pickerView" destination="2By-O6-xgP" id="z1n-Ak-5QD"/>
                         <outlet property="systemStatus" destination="aMd-EE-5vZ" id="9nm-cS-vkj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mnJ-ha-d45" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-91" y="-592"/>
+            <point key="canvasLocation" x="197" y="-592"/>
         </scene>
         <!--Collection View Controller-->
         <scene sceneID="89L-iH-dGT">
@@ -53,12 +81,12 @@
                         <viewControllerLayoutGuide type="bottom" id="ENB-yr-ldL"/>
                     </layoutGuides>
                     <view key="view" autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" multipleTouchEnabled="YES" contentMode="center" id="qm9-bK-GgZ">
-                        <rect key="frame" x="0.0" y="44" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <collectionView autoresizesSubviews="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="luN-Kt-odC">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                                <color key="backgroundColor" red="0.48072522099999998" green="0.48072522099999998" blue="0.48072522099999998" alpha="1" colorSpace="calibratedRGB"/>
+                            <collectionView autoresizesSubviews="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="luN-Kt-odC">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <color key="backgroundColor" red="0.10219381317171705" green="0.10219381317171705" blue="0.10219381317171705" alpha="1" colorSpace="calibratedRGB"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="rDn-Ys-fVP">
                                     <size key="itemSize" width="106" height="150"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -80,13 +108,16 @@
                                 </cells>
                             </collectionView>
                         </subviews>
-                        <color key="backgroundColor" red="0.95046164769999997" green="0.85562465350000005" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="backgroundColor" red="0.3581321023131312" green="0.3581321023131312" blue="0.3581321023131312" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="luN-Kt-odC" secondAttribute="trailing" id="9cZ-BW-Yi2"/>
+                            <constraint firstItem="ENB-yr-ldL" firstAttribute="top" secondItem="luN-Kt-odC" secondAttribute="bottom" id="FSR-rc-gA8"/>
+                            <constraint firstItem="luN-Kt-odC" firstAttribute="leading" secondItem="qm9-bK-GgZ" secondAttribute="leading" id="h8z-g3-IXr"/>
+                            <constraint firstItem="luN-Kt-odC" firstAttribute="top" secondItem="qm9-bK-GgZ" secondAttribute="top" id="t8Z-FO-IVF"/>
+                        </constraints>
                     </view>
                     <toolbarItems/>
-                    <nil key="simulatedStatusBarMetrics"/>
-                    <nil key="simulatedTopBarMetrics"/>
                     <nil key="simulatedBottomBarMetrics"/>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <connections>
                         <outlet property="collectionView" destination="luN-Kt-odC" id="Mye-Lx-UZI"/>
                         <outlet property="view" destination="qm9-bK-GgZ" id="s96-gE-di4"/>
@@ -94,7 +125,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1KS-gr-04C" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="280" y="-592"/>
+            <point key="canvasLocation" x="946" y="-603"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="NlL-8l-QH3">
@@ -102,10 +133,14 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="BLJ-Mm-gQb" sceneMemberID="viewController">
                     <toolbarItems/>
                     <simulatedStatusBarMetrics key="simulatedStatusBarMetrics"/>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="aBC-5O-HnD">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="tintColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="barTintColor" red="0.15319207702020199" green="0.15319207702020199" blue="0.15319207702020199" alpha="1" colorSpace="calibratedRGB"/>
+                        <textAttributes key="titleTextAttributes">
+                            <color key="textColor" red="0.51440183080808066" green="0.51440183080808066" blue="0.51440183080808066" alpha="1" colorSpace="calibratedRGB"/>
+                        </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
@@ -114,7 +149,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="FXi-CZ-tVg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-491" y="-592"/>
+            <point key="canvasLocation" x="-539" y="-639"/>
         </scene>
     </scenes>
 </document>

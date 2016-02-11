@@ -22,11 +22,11 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     
-    [Parse setApplicationId:@"jjcVHlw8UwWC2FkXZhL7JNLqDiXJlyBnKVAIsrbO"
-                  clientKey:@"oivL7zqMRzHAv0fBKJkUuxnQch3tNkQ91t3WMJr1"];
+    [Parse setApplicationId:@"###"
+                  clientKey:@"###"];
     
     PNConfiguration *configuration =
-    [PNConfiguration configurationWithPublishKey:@"pub-c-8ac615f6-dced-40c4-b125-da247a0929c0" subscribeKey:@"sub-c-071aae4c-3167-11e5-9b16-02ee2ddab7fe"];
+    [PNConfiguration configurationWithPublishKey:@"###" subscribeKey:@"###"];
     
     self.client = [PubNub clientWithConfiguration:configuration];
     [self.client addListener:self];
